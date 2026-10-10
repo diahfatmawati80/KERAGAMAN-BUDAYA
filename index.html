@@ -1,0 +1,1157 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Petualangan Nusantara - Ular Tangga Edukatif Keragaman Budaya</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Fredoka & Nunito -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Canvas Confetti CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        fredoka: ['Fredoka', 'sans-serif'],
+                        nunito: ['Nunito', 'sans-serif'],
+                    },
+                    colors: {
+                        nusantara: {
+                            red: '#FF5964',
+                            yellow: '#FFD166',
+                            green: '#06D6A0',
+                            blue: '#118AB2',
+                            darkBlue: '#073B4C',
+                            purple: '#9B5DE5'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: linear-gradient(135deg, #e0f2fe 0%, #fce7f3 50%, #fef3c7 100%);
+            touch-action: manipulation;
+        }
+
+        .font-fredoka {
+            font-family: 'Fredoka', sans-serif;
+        }
+
+        /* High-vibrancy "Cetar" image filter for cultural graphics */
+        .img-cetar {
+            filter: saturate(165%) contrast(115%) brightness(108%);
+            transition: transform 0.3s ease, filter 0.3s ease;
+        }
+        .img-cetar:hover {
+            filter: saturate(180%) contrast(120%) brightness(110%);
+        }
+
+        /* Glowing card container */
+        .glow-cetar {
+            box-shadow: 0 10px 30px -5px rgba(255, 87, 34, 0.35), 0 0 20px rgba(156, 39, 176, 0.25);
+        }
+
+        /* Board Container */
+        .board-container {
+            position: relative;
+            width: 100%;
+            max-width: 680px;
+            aspect-ratio: 1 / 1;
+            box-shadow: 0 20px 35px -5px rgba(255, 89, 100, 0.25), 0 10px 15px -5px rgba(17, 138, 178, 0.2);
+            border-radius: 1.5rem;
+            background: #ffffff;
+            padding: 8px;
+        }
+
+        /* 10x10 Grid Layout */
+        .board-grid {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            grid-template-rows: repeat(10, 1fr);
+            width: 100%;
+            height: 100%;
+            border-radius: 1.25rem;
+            overflow: hidden;
+            border: 6px solid #073B4C;
+        }
+
+        .tile {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 2px;
+            user-select: none;
+            transition: transform 0.2s;
+            overflow: hidden;
+        }
+
+        /* Player Pawn styling */
+        .pawn-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 20;
+        }
+
+        .pawn {
+            position: absolute;
+            width: 8%;
+            height: 8%;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            color: white;
+            font-weight: bold;
+        }
+
+        /* Custom Dice styling */
+        .dice {
+            width: 70px;
+            height: 70px;
+            transform-style: preserve-3d;
+            transition: transform 1s ease-out;
+            cursor: pointer;
+        }
+
+        .dice-rolling {
+            animation: rollDice 1s ease-in-out infinite;
+        }
+
+        @keyframes rollDice {
+            0% { transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg); }
+            50% { transform: rotateX(360deg) rotateY(180deg) rotateZ(180deg); }
+            100% { transform: rotateX(720deg) rotateY(360deg) rotateZ(360deg); }
+        }
+
+        /* Ladder SVG styling */
+        #ladder-svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .ladder-line {
+            stroke: #8B4513;
+            stroke-width: 8;
+            stroke-linecap: round;
+        }
+
+        .ladder-rung {
+            stroke: #CD853F;
+            stroke-width: 5;
+            stroke-linecap: round;
+        }
+
+        /* Animations */
+        @keyframes bounceIn {
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.05); }
+            70% { transform: scale(0.9); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .bounce-in {
+            animation: bounceIn 0.5s ease-out;
+        }
+
+        .pulse-btn {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between text-slate-800">
+
+    <header class="bg-white/90 backdrop-blur-md border-b border-sky-200 sticky top-0 z-30 px-4 py-3 shadow-sm">
+        <div class="max-w-6xl mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-nusantara-red via-amber-400 to-nusantara-yellow flex items-center justify-center text-white text-xl shadow-md font-bold">
+                    🇮🇩
+                </div>
+                <div>
+                    <h1 class="font-fredoka text-xl md:text-2xl text-nusantara-darkBlue font-bold leading-none">Petualangan Nusantara</h1>
+                    <p class="text-xs text-slate-500 font-semibold">Ular Tangga Edukatif • Gambar Asli Budaya Indonesia</p>
+                </div>
+            </div>
+
+            <div class="flex items-center space-x-2">
+                <button id="btn-sound" onclick="toggleSound()" class="p-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 transition" title="Suara">
+                    <i id="sound-icon" class="fa-solid fa-volume-high"></i>
+                </button>
+                <button onclick="showInstructionModal()" class="px-3 py-2 rounded-xl bg-sky-100 hover:bg-sky-200 text-sky-700 font-bold text-xs md:text-sm flex items-center space-x-1.5 transition">
+                    <i class="fa-solid fa-circle-question"></i>
+                    <span>Cara Main</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-6xl w-full mx-auto p-3 md:p-6 flex flex-col justify-center items-center">
+
+        <!-- SETUP SCREEN -->
+        <div id="setup-screen" class="w-full max-w-xl bg-white rounded-3xl p-6 md:p-8 shadow-2xl border-4 border-sky-100 bounce-in">
+            <div class="text-center mb-6">
+                <span class="bg-amber-100 text-amber-900 text-xs font-extrabold px-3 py-1 rounded-full uppercase tracking-wider">🌟 Tanpa Ular, Hanya Tangga! 🌟</span>
+                <h2 class="font-fredoka text-2xl md:text-3xl font-bold text-slate-800 mt-2">Pilih Mode Permainan</h2>
+                <p class="text-slate-500 text-sm mt-1">Uji pengetahuan keragaman budaya Indonesia dengan gambar visual asli!</p>
+            </div>
+
+            <div class="mb-6">
+                <label class="block text-sm font-bold text-slate-700 mb-2">Jumlah Pemain:</label>
+                <div class="grid grid-cols-4 gap-3">
+                    <button type="button" onclick="setPlayerCount(1)" class="btn-player-count p-3 rounded-2xl border-2 border-slate-200 font-bold hover:border-nusantara-blue flex flex-col items-center transition bg-slate-50" data-count="1">
+                        <span class="text-xl mb-1">🧍</span>
+                        <span class="text-xs">1 Pemain</span>
+                    </button>
+                    <button type="button" onclick="setPlayerCount(2)" class="btn-player-count p-3 rounded-2xl border-2 border-sky-500 bg-sky-50 font-bold hover:border-nusantara-blue flex flex-col items-center transition" data-count="2">
+                        <span class="text-xl mb-1">👯</span>
+                        <span class="text-xs">2 Pemain</span>
+                    </button>
+                    <button type="button" onclick="setPlayerCount(3)" class="btn-player-count p-3 rounded-2xl border-2 border-slate-200 font-bold hover:border-nusantara-blue flex flex-col items-center transition bg-slate-50" data-count="3">
+                        <span class="text-xl mb-1">👨‍👩‍👦</span>
+                        <span class="text-xs">3 Pemain</span>
+                    </button>
+                    <button type="button" onclick="setPlayerCount(4)" class="btn-player-count p-3 rounded-2xl border-2 border-slate-200 font-bold hover:border-nusantara-blue flex flex-col items-center transition bg-slate-50" data-count="4">
+                        <span class="text-xl mb-1">👨‍👩‍👧‍👦</span>
+                        <span class="text-xs">4 Pemain</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Players Setup List -->
+            <div id="player-inputs-container" class="space-y-3 mb-6"></div>
+
+            <button onclick="startGame()" class="w-full py-4 rounded-2xl bg-gradient-to-r from-emerald-400 via-teal-500 to-cyan-600 hover:from-emerald-500 hover:to-cyan-700 text-white font-fredoka text-xl font-bold shadow-lg shadow-teal-500/30 transform active:scale-95 transition">
+                🚀 Mulai Jelajah Nusantara!
+            </button>
+        </div>
+
+        <!-- GAME SCREEN -->
+        <div id="game-screen" class="w-full hidden flex-col lg:flex-row gap-6 items-center lg:items-start justify-center">
+
+            <!-- Board Side -->
+            <div class="board-container bg-white rounded-3xl p-2 md:p-3">
+                <div id="board" class="board-grid"></div>
+                <svg id="ladder-svg"></svg>
+                <div id="pawn-layer" class="pawn-container"></div>
+            </div>
+
+            <!-- Game Control Side Panel -->
+            <div class="w-full lg:w-80 flex flex-col gap-4">
+
+                <!-- Current Turn Banner -->
+                <div class="bg-white rounded-3xl p-5 shadow-lg border-2 border-slate-100 text-center relative overflow-hidden">
+                    <div id="turn-indicator-bg" class="absolute inset-0 opacity-10 transition-colors duration-300 bg-sky-500"></div>
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">Giliran Bermain</span>
+                    <div class="flex items-center justify-center space-x-3 my-1">
+                        <div id="current-player-avatar" class="text-3xl p-2 rounded-2xl bg-sky-100">🦊</div>
+                        <div class="text-left">
+                            <h3 id="current-player-name" class="font-fredoka text-xl font-bold text-slate-800">Pemain 1</h3>
+                            <p id="current-player-pos" class="text-xs font-bold text-emerald-600">Berada di Petak 1</p>
+                        </div>
+                    </div>
+
+                    <!-- Dice Roll Area -->
+                    <div class="mt-4 pt-4 border-t border-slate-100 flex flex-col items-center">
+                        <div id="dice-container" class="w-20 h-20 bg-gradient-to-br from-amber-400 to-orange-500 rounded-2xl flex items-center justify-center text-white text-4xl shadow-lg cursor-pointer transform hover:scale-105 transition my-2" onclick="handleDiceRollClick()">
+                            <i id="dice-icon" class="fa-solid fa-dice-one"></i>
+                        </div>
+                        <button id="btn-roll-dice" onclick="handleDiceRollClick()" class="w-full mt-2 py-3 px-4 rounded-xl bg-nusantara-blue hover:bg-sky-700 text-white font-fredoka font-bold shadow-md transform active:scale-95 transition pulse-btn">
+                            🎲 Kocok Dadu!
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Leaderboard Panel -->
+                <div class="bg-white rounded-3xl p-5 shadow-lg border-2 border-slate-100">
+                    <h4 class="font-fredoka text-lg font-bold text-slate-700 mb-3 flex items-center justify-between">
+                        <span>🏆 Papan Skor</span>
+                        <span class="text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full font-sans">Target: Petak 100</span>
+                    </h4>
+                    <div id="leaderboard-list" class="space-y-2"></div>
+                </div>
+
+                <!-- Info Legend -->
+                <div class="bg-amber-50 rounded-2xl p-3.5 border border-amber-200 text-amber-800 text-xs flex items-center space-x-3">
+                    <div class="text-3xl">🏛️</div>
+                    <div>
+                        <p class="font-bold text-amber-900">Eksplorasi Budaya Asli:</p>
+                        <p class="text-[11px] leading-tight text-amber-800">Setiap soal dilengkapi foto & ilustrasi khas warisan budaya Indonesia agar sesuai 100%!</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+
+    <!-- QUIZ MODAL -->
+    <div id="quiz-modal" class="fixed inset-0 z-50 bg-slate-900/65 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl max-w-lg w-full p-5 md:p-6 shadow-2xl border-4 border-amber-300 bounce-in relative overflow-hidden max-h-[92vh] flex flex-col justify-between">
+            <div>
+                <!-- Modal Header -->
+                <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-3">
+                    <div class="flex items-center space-x-2">
+                        <span class="text-2xl">🏛️</span>
+                        <div>
+                            <span id="quiz-category" class="text-xs font-bold text-sky-600 uppercase tracking-wide">Pakaian Adat</span>
+                            <h3 class="font-fredoka text-lg font-bold text-slate-800">Tantangan Budaya Nusantara</h3>
+                        </div>
+                    </div>
+                    <div id="dice-result-badge" class="px-3 py-1 bg-amber-100 text-amber-800 font-bold text-sm rounded-full">
+                        Dadu: <span id="dice-number-val">0</span>
+                    </div>
+                </div>
+
+                <!-- Question Text -->
+                <p id="quiz-question-text" class="text-sm md:text-base font-bold text-slate-800 leading-snug mb-3">
+                    Pertanyaan akan muncul di sini...
+                </p>
+
+                <!-- REAL PHOTO / SVG ILLUSTRATION DISPLAY CONTAINER -->
+                <div id="quiz-image-container" class="mb-4 relative rounded-2xl overflow-hidden border-2 border-amber-400 shadow-md bg-gradient-to-br from-amber-50 via-rose-50 to-sky-50 min-h-[170px] flex flex-col items-center justify-center">
+                    
+                    <!-- Primary Real Culture Photo Display -->
+                    <img id="quiz-real-photo" alt="Foto Asli Kebudayaan Indonesia" class="w-full h-48 md:h-56 object-cover img-cetar rounded-t-2xl" onerror="handleImageError(this)">
+                    
+                    <!-- Fallback SVG Artwork Box (shown if photo fails to load) -->
+                    <div id="quiz-svg-fallback" class="hidden w-full h-48 md:h-56 p-4 flex-col items-center justify-center text-center bg-gradient-to-br from-amber-400 via-rose-400 to-purple-500 text-white">
+                        <div id="svg-art-holder" class="w-24 h-24 mb-1 filter drop-shadow-lg flex items-center justify-center"></div>
+                        <p id="svg-title-holder" class="font-fredoka font-bold text-base text-white drop-shadow-md">Budaya Nusantara</p>
+                    </div>
+
+                    <!-- Caption Tag -->
+                    <div class="w-full bg-slate-900/85 backdrop-blur-md px-3 py-2 text-center text-white text-xs font-bold flex items-center justify-between">
+                        <span id="quiz-photo-caption" class="truncate">Foto Asli Warisan Budaya</span>
+                        <span class="text-[10px] bg-emerald-500 text-white px-2 py-0.5 rounded-full font-bold flex items-center gap-1">
+                            <i class="fa-solid fa-camera"></i> Foto Asli
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Answer Options -->
+                <div id="quiz-options-container" class="space-y-2 mb-3"></div>
+            </div>
+
+            <div>
+                <!-- Feedback Area -->
+                <div id="quiz-feedback" class="hidden p-3 rounded-xl text-center font-bold text-xs md:text-sm mb-3"></div>
+
+                <!-- Action Button -->
+                <button id="btn-next-action" onclick="applyQuizResult()" class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-600 hover:to-indigo-700 text-white font-fredoka text-base font-bold hidden shadow-lg transition">
+                    Lanjutkan Lintas Petak ➡️
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- VICTORY MODAL -->
+    <div id="victory-modal" class="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-md flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl max-w-md w-full p-8 shadow-2xl border-4 border-amber-300 text-center bounce-in relative">
+            <div class="text-6xl mb-2">🎉🏆🎉</div>
+            <h2 class="font-fredoka text-3xl font-bold text-slate-800">Selamat!</h2>
+            <p id="winner-name-text" class="text-xl font-bold text-nusantara-blue my-2">Pemain 1 Menang!</p>
+            <p class="text-slate-500 text-sm mb-6">Kamu telah berhasil menjejaki seluruh keragaman budaya Indonesia dan mencapai Petak 100!</p>
+
+            <button onclick="resetGame()" class="w-full py-4 rounded-2xl bg-gradient-to-r from-emerald-400 to-teal-500 hover:from-emerald-500 hover:to-teal-600 text-white font-fredoka text-xl font-bold shadow-lg transform active:scale-95 transition">
+                🔄 Main Lagi
+            </button>
+        </div>
+    </div>
+
+    <!-- INSTRUCTION MODAL -->
+    <div id="instruction-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border-2 border-slate-100 bounce-in">
+            <div class="flex justify-between items-center mb-4 border-b border-slate-100 pb-2">
+                <h3 class="font-fredoka text-xl font-bold text-slate-800">📜 Cara Bermain</h3>
+                <button onclick="hideInstructionModal()" class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
+            </div>
+            <div class="space-y-3 text-sm text-slate-600 leading-relaxed">
+                <div class="flex items-start space-x-3">
+                    <span class="bg-sky-100 text-sky-700 font-bold rounded-lg px-2 py-0.5 text-xs mt-0.5">1</span>
+                    <p>Kocok dadu saat giliranmu untuk menentukan jumlah langkah.</p>
+                </div>
+                <div class="flex items-start space-x-3">
+                    <span class="bg-sky-100 text-sky-700 font-bold rounded-lg px-2 py-0.5 text-xs mt-0.5">2</span>
+                    <p>Amati <strong>foto budaya asli</strong> dan jawab pertanyaan keragaman budaya yang muncul.</p>
+                </div>
+                <div class="flex items-start space-x-3">
+                    <span class="bg-emerald-100 text-emerald-700 font-bold rounded-lg px-2 py-0.5 text-xs mt-0.5">3</span>
+                    <p><strong class="text-emerald-600">Jika Benar:</strong> Bidakmu bergerak MAJU sesuai nilai kocokan dadu.</p>
+                </div>
+                <div class="flex items-start space-x-3">
+                    <span class="bg-rose-100 text-rose-700 font-bold rounded-lg px-2 py-0.5 text-xs mt-0.5">4</span>
+                    <p><strong class="text-rose-600">Jika Salah:</strong> Bidakmu terpaksa MUNDUR sesuai nilai kocokan dadu!</p>
+                </div>
+                <div class="flex items-start space-x-3">
+                    <span class="bg-amber-100 text-amber-700 font-bold rounded-lg px-2 py-0.5 text-xs mt-0.5">5</span>
+                    <p><strong class="text-amber-600">Bonus Tangga:</strong> Jika mendarat di bawah tangga, kamu langsung naik ke atas!</p>
+                </div>
+                <div class="flex items-start space-x-3">
+                    <span class="bg-purple-100 text-purple-700 font-bold rounded-lg px-2 py-0.5 text-xs mt-0.5">6</span>
+                    <p>Pemain pertama yang mendarat tepat di <strong>Petak 100</strong> menjadi pemenang!</p>
+                </div>
+            </div>
+            <button onclick="hideInstructionModal()" class="w-full mt-5 py-3 rounded-xl bg-slate-800 text-white font-bold text-sm hover:bg-slate-900 transition">
+                Mengerti, Ayo Main!
+            </button>
+        </div>
+    </div>
+
+    <footer class="bg-white/60 border-t border-slate-200 py-2 text-center text-xs text-slate-500 font-semibold">
+        🇮🇩 Game Edukasi Keragaman Budaya Indonesia • Gambar Asli & Presisi Nusantara
+    </footer>
+
+    <script>
+        /* -------------------------------------------------------------
+           1. ACCURATE CULTURAL QUESTION DATABASE WITH REAL PHOTOGRAPHY
+        ------------------------------------------------------------- */
+        const QUESTION_DATABASE = [
+            {
+                id: "rumah-gadang",
+                category: "Rumah Adat",
+                question: "Rumah Adat 'Rumah Gadang' dengan atap melengkung runcing menyerupai tanduk kerbau (Gonjong) berasal dari provinsi...",
+                options: ["Sumatera Barat", "Jawa Barat", "Sulawesi Selatan", "Papua"],
+                answer: 0,
+                caption: "Foto Asli Rumah Gadang - Minangkabau, Sumatera Barat",
+                imageKey: "rumah-gadang",
+                imageUrl: "https://images.unsplash.com/photo-1596402184320-417e7178b2cd?auto=format&fit=crop&w=800&q=80"
+            },
+            {
+                id: "honai",
+                category: "Rumah Adat",
+                question: "Rumah adat khas masyarakat Pegunungan Arfak / Papua berbentuk bulat tanpa jendela dengan atap jerami dinamakan...",
+                options: ["Tongkonan", "Honai", "Joglo", "Bale Manten"],
+                answer: 1,
+                caption: "Foto Asli Rumah Honai - Papua",
+                imageKey: "honai",
+                imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/00/Honai_House_Papua.jpg/800px-Honai_House_Papua.jpg"
+            },
+            {
+                id: "ulos",
+                category: "Pakaian Adat & Kain",
+                question: "Kain tenun tradisional khas Batak Sumatera Utara yang sarat makna dan dipundakkan pada upacara adat adalah kain...",
+                options: ["Batik", "Songket", "Ulos", "Ikat"],
+                answer: 2,
+                caption: "Foto Asli Kain Ulos - Suku Batak, Sumatera Utara",
+                imageKey: "ulos",
+                imageUrl: "https://images.unsplash.com/photo-1609137144813-7d9921338f24?auto=format&fit=crop&w=800&q=80"
+            },
+            {
+                id: "baju-bodo",
+                category: "Pakaian Adat",
+                question: "Baju Bodo merupakan salah satu pakaian adat tertua di dunia khas perempuan yang berasal dari suku...",
+                options: ["Sunda", "Bugis / Makassar", "Dayak", "Minang"],
+                answer: 1,
+                caption: "Foto Asli Baju Bodo - Bugis / Makassar, Sulawesi Selatan",
+                imageKey: "baju-bodo",
+                imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Baju_Bodo_Bugis_Makassar.jpg/800px-Baju_Bodo_Bugis_Makassar.jpg"
+            },
+            {
+                id: "tari-kecak",
+                category: "Tarian Daerah",
+                question: "Seni Tari Kecak yang menyajikan atraksi lingkaran para penari melantunkan ritme 'cak-cak-cak' berasal dari daerah...",
+                options: ["Bali", "Lombok", "Aceh", "Jawa Timur"],
+                answer: 0,
+                caption: "Foto Asli Tari Kecak - Uluwatu, Bali",
+                imageKey: "tari-kecak",
+                imageUrl: "https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=800&q=80"
+            },
+            {
+                id: "tari-saman",
+                category: "Tarian Daerah",
+                question: "Tari Saman yang mengutamakan kecepatan dan kekompakan tepuk dada & tangan antar penari berasal dari provinsi...",
+                options: ["Riau", "Aceh", "Sumatera Selatan", "Bengkulu"],
+                answer: 1,
+                caption: "Foto Asli Tari Saman - Gayo, Aceh",
+                imageKey: "tari-saman",
+                imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/Saman_dance.jpg/800px-Saman_dance.jpg"
+            },
+            {
+                id: "angklung",
+                category: "Alat Musik",
+                question: "Alat musik bambu bernada ganda khas Sunda Jawa Barat yang dimainkan dengan cara digoyangkan adalah...",
+                options: ["Gamelan", "Angklung", "Sasando", "Kolintang"],
+                answer: 1,
+                caption: "Foto Asli Angklung Bambu - Jawa Barat",
+                imageKey: "angklung",
+                imageUrl: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=800&q=80"
+            },
+            {
+                id: "sasando",
+                category: "Alat Musik",
+                question: "Sasando merupakan alat musik petik unik bermaterialkan wadah daun lontar yang berasal dari pulau Rote di...",
+                options: ["Nusa Tenggara Timur (NTT)", "Maluku", "Papua Barat", "Kalimantan Barat"],
+                answer: 0,
+                caption: "Foto Asli Alat Musik Sasando - NTT",
+                imageKey: "sasando",
+                imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/Sasando_NTT.jpg/800px-Sasando_NTT.jpg"
+            },
+            {
+                id: "rendang",
+                category: "Kuliner Khas",
+                question: "Masakan daging kaya rempah khas Minangkabau yang dinobatkan sebagai salah satu makanan terlezat di dunia adalah...",
+                options: ["Gudeg", "Rendang", "Papeda", "Soto Lamongan"],
+                answer: 1,
+                caption: "Foto Asli Rendang Daging Minang - Sumatera Barat",
+                imageKey: "rendang",
+                imageUrl: "https://images.unsplash.com/photo-1626804475297-41608e074eb1?auto=format&fit=crop&w=800&q=80"
+            },
+            {
+                id: "papeda",
+                category: "Kuliner Khas",
+                question: "Papeda adalah makanan pokok khas Timur Indonesia yang terbuat dari olahan sagu berdampingan dengan kuah kuning, terkenal di...",
+                options: ["Jawa Tengah", "Maluku & Papua", "Kalimantan Timur", "Bali"],
+                answer: 1,
+                caption: "Foto Asli Papeda & Ikan Kuah Kuning - Papua & Maluku",
+                imageKey: "papeda",
+                imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7a/Papeda_Ikan_Kuah_Kuning_Papua.jpg/800px-Papeda_Ikan_Kuah_Kuning_Papua.jpg"
+            },
+            {
+                id: "keris",
+                category: "Senjata Tradisional",
+                question: "Senjata tikam berlekuk khas yang diakui UNESCO sebagai warisan budaya takbenda Indonesia adalah...",
+                options: ["Keris", "Sumpit", "Mandau", "Kujang"],
+                answer: 0,
+                caption: "Foto Asli Keris Jawa Tradisional - Warisan UNESCO",
+                imageKey: "keris",
+                imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/67/Keris_Jawa_Indonesia.jpg/800px-Keris_Jawa_Indonesia.jpg"
+            },
+            {
+                id: "rencong",
+                category: "Senjata Tradisional",
+                question: "Rencong adalah senjata tradisional bertangkai lengkung kebanggaan masyarakat pahlawan dari...",
+                options: ["Aceh", "Lampung", "Banten", "DKI Jakarta"],
+                answer: 0,
+                caption: "Foto Asli Rencong Tradisional - Aceh",
+                imageKey: "rencong",
+                imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Rencong_Aceh.jpg/800px-Rencong_Aceh.jpg"
+            },
+            {
+                id: "ngaben",
+                category: "Upacara Adat",
+                question: "Upacara kremasi jenazah khas adat Hindu Bali yang megah menggunakan lembu dan bade dinamakan...",
+                options: ["Rambu Solo", "Ngaben", "Kasada", "Sekaten"],
+                answer: 1,
+                caption: "Foto Asli Upacara Ngaben - Bali",
+                imageKey: "ngaben",
+                imageUrl: "https://images.unsplash.com/photo-1518548419970-58e3b4079ab2?auto=format&fit=crop&w=800&q=80"
+            },
+            {
+                id: "wayang-kulit",
+                category: "Seni Pertunjukan",
+                question: "Pertunjukan seni teater wayang menggunakan boneka kulit bertema epik Mahabharata dan Ramayana adalah...",
+                options: ["Reog", "Wayang Kulit", "Lenong", "Kuda Lumping"],
+                answer: 1,
+                caption: "Foto Asli Pertunjukan Wayang Kulit - Jawa",
+                imageKey: "wayang-kulit",
+                imageUrl: "https://images.unsplash.com/photo-1588668214407-6ea9a6d8c272?auto=format&fit=crop&w=800&q=80"
+            },
+            {
+                id: "tifa",
+                category: "Alat Musik",
+                question: "Tifa merupakan alat musik ritmis sejenis gendang berbahan kayu yang diukir indah, berasal dari...",
+                options: ["Maluku & Papua", "Kalimantan Selatan", "Jawa Barat", "Sumatera Barat"],
+                answer: 0,
+                caption: "Foto Asli Alat Musik Tifa Ukir - Papua & Maluku",
+                imageKey: "tifa",
+                imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/Tifa_Papua.jpg/800px-Tifa_Papua.jpg"
+            },
+            {
+                id: "batik",
+                category: "Wastra Nusantara",
+                question: "Hari Batik Nasional diperingati setiap tanggal 2 Oktober karena dikukuhkan oleh UNESCO pada tahun...",
+                options: ["2009", "1945", "2015", "1998"],
+                answer: 0,
+                caption: "Foto Asli Kain Batik Tulis Tradisional Indonesia",
+                imageKey: "batik",
+                imageUrl: "https://images.unsplash.com/photo-1606744888344-493238951221?auto=format&fit=crop&w=800&q=80"
+            }
+        ];
+
+        // Ladders Configuration (Start Square -> End Square) - NO SNAKES!
+        const LADDERS = {
+            4: 25,
+            13: 34,
+            28: 52,
+            40: 62,
+            54: 76,
+            63: 82,
+            75: 96
+        };
+
+        const TILE_ICONS = {
+            1: "🚩", 4: "🪜", 8: "🕌", 12: "🌺", 13: "🪜", 18: "👺", 22: "🗿",
+            25: "✨", 28: "🪜", 33: "👑", 34: "✨", 40: "🪜", 45: "🌋", 52: "✨",
+            54: "🪜", 60: "⛵", 62: "✨", 63: "🪜", 70: "🦅", 75: "🪜", 82: "✨",
+            88: "🐅", 96: "✨", 100: "🏆"
+        };
+
+        let playerCount = 2;
+        let players = [];
+        let currentTurnIndex = 0;
+        let isRolling = false;
+        let currentDiceRoll = 1;
+        let activeQuestion = null;
+        let soundEnabled = true;
+
+        /* Web Audio API Synthesizer */
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playSound(type) {
+            if (!soundEnabled) return;
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                const now = audioCtx.currentTime;
+
+                if (type === 'roll') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(150, now);
+                    osc.frequency.exponentialRampToValueAtTime(400, now + 0.1);
+                    gain.gain.setValueAtTime(0.1, now);
+                    gain.gain.linearRampToValueAtTime(0.01, now + 0.1);
+                    osc.start(now);
+                    osc.stop(now + 0.1);
+                } else if (type === 'correct') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(523.25, now);
+                    osc.frequency.setValueAtTime(659.25, now + 0.1);
+                    osc.frequency.setValueAtTime(783.99, now + 0.2);
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.linearRampToValueAtTime(0.01, now + 0.4);
+                    osc.start(now);
+                    osc.stop(now + 0.4);
+                } else if (type === 'wrong') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(300, now);
+                    osc.frequency.setValueAtTime(200, now + 0.15);
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.linearRampToValueAtTime(0.01, now + 0.3);
+                    osc.start(now);
+                    osc.stop(now + 0.3);
+                } else if (type === 'ladder') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(261.63, now);
+                    osc.frequency.exponentialRampToValueAtTime(880, now + 0.5);
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.linearRampToValueAtTime(0.01, now + 0.5);
+                    osc.start(now);
+                    osc.stop(now + 0.5);
+                }
+            } catch (e) {
+                console.log("Audio play error", e);
+            }
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            const icon = document.getElementById('sound-icon');
+            icon.className = soundEnabled ? 'fa-solid fa-volume-high' : 'fa-solid fa-volume-xmark';
+        }
+
+        window.onload = function() {
+            setPlayerCount(2);
+            renderBoard();
+            window.addEventListener('resize', drawLadders);
+        };
+
+        function setPlayerCount(count) {
+            playerCount = count;
+            
+            document.querySelectorAll('.btn-player-count').forEach(btn => {
+                if (parseInt(btn.getAttribute('data-count')) === count) {
+                    btn.classList.add('border-sky-500', 'bg-sky-50');
+                    btn.classList.remove('border-slate-200', 'bg-slate-50');
+                } else {
+                    btn.classList.remove('border-sky-500', 'bg-sky-50');
+                    btn.classList.add('border-slate-200', 'bg-slate-50');
+                }
+            });
+
+            const container = document.getElementById('player-inputs-container');
+            container.innerHTML = '';
+
+            const avatarIcons = ["🦊", "🐼", "🐯", "🐨"];
+            const colors = ["#FF5964", "#118AB2", "#FFD166", "#06D6A0"];
+
+            for (let i = 0; i < count; i++) {
+                container.innerHTML += `
+                    <div class="flex items-center space-x-3 bg-slate-50 p-2.5 rounded-2xl border border-slate-200">
+                        <div class="w-10 h-10 rounded-xl flex items-center justify-center text-xl" style="background-color: ${colors[i]}20; color: ${colors[i]}">
+                            ${avatarIcons[i]}
+                        </div>
+                        <input type="text" id="player-name-${i}" value="Pemain ${i+1}" maxlength="12" 
+                            class="flex-grow bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-sm font-bold text-slate-700 focus:outline-none focus:border-sky-500">
+                    </div>
+                `;
+            }
+        }
+
+        function renderBoard() {
+            const board = document.getElementById('board');
+            board.innerHTML = '';
+
+            const cetarGradients = [
+                'bg-gradient-to-br from-rose-200 via-pink-100 to-rose-300 text-rose-900', 
+                'bg-gradient-to-br from-sky-200 via-cyan-100 to-sky-300 text-sky-900', 
+                'bg-gradient-to-br from-emerald-200 via-teal-100 to-emerald-300 text-emerald-900', 
+                'bg-gradient-to-br from-amber-200 via-yellow-100 to-amber-300 text-amber-900', 
+                'bg-gradient-to-br from-purple-200 via-fuchsia-100 to-purple-300 text-purple-900', 
+                'bg-gradient-to-br from-indigo-200 via-violet-100 to-indigo-300 text-indigo-900'
+            ];
+
+            for (let row = 9; row >= 0; row--) {
+                const isEvenRowFromBottom = (row % 2 === 0);
+                for (let col = 0; col < 10; col++) {
+                    let tileNumber = isEvenRowFromBottom ? (row * 10 + col + 1) : (row * 10 + (9 - col) + 1);
+
+                    const gradientClass = cetarGradients[(tileNumber * 7) % cetarGradients.length];
+                    const icon = TILE_ICONS[tileNumber] || '';
+
+                    const tileEl = document.createElement('div');
+                    tileEl.className = `tile ${gradientClass} border-2 border-white/80 shadow-inner font-extrabold`;
+                    tileEl.id = `tile-${tileNumber}`;
+
+                    tileEl.innerHTML = `
+                        <div class="w-full flex justify-between items-start text-[11px] md:text-xs font-black drop-shadow-sm z-10">
+                            <span class="bg-white/80 backdrop-blur-xs px-1 rounded-md text-slate-900 font-extrabold">${tileNumber}</span>
+                            ${LADDERS[tileNumber] ? '<span class="text-amber-600 font-extrabold animate-bounce text-sm">🪜</span>' : ''}
+                        </div>
+                        <div class="text-lg md:text-2xl my-auto z-10 filter drop-shadow">${icon}</div>
+                    `;
+
+                    board.appendChild(tileEl);
+                }
+            }
+        }
+
+        function getTileCoordinates(tileNumber) {
+            const zeroBased = tileNumber - 1;
+            const row = Math.floor(zeroBased / 10);
+            let col = zeroBased % 10;
+
+            if (row % 2 === 1) col = 9 - col;
+
+            return { x: col * 10 + 5, y: (9 - row) * 10 + 5 };
+        }
+
+        function drawLadders() {
+            const svg = document.getElementById('ladder-svg');
+            const board = document.getElementById('board');
+            if (!board || !svg) return;
+
+            const rect = board.getBoundingClientRect();
+            svg.setAttribute('viewBox', `0 0 ${rect.width} ${rect.height}`);
+            svg.innerHTML = '';
+
+            for (const [startStr, endNum] of Object.entries(LADDERS)) {
+                const startNum = parseInt(startStr);
+                const startCoord = getTileCoordinates(startNum);
+                const endCoord = getTileCoordinates(endNum);
+
+                const x1 = (startCoord.x / 100) * rect.width;
+                const y1 = (startCoord.y / 100) * rect.height;
+                const x2 = (endCoord.x / 100) * rect.width;
+                const y2 = (endCoord.y / 100) * rect.height;
+
+                const dx = x2 - x1;
+                const dy = y2 - y1;
+                const length = Math.sqrt(dx * dx + dy * dy);
+                const offsetX = (-dy / length) * 8;
+                const offsetY = (dx / length) * 8;
+
+                const rail1 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                rail1.setAttribute('x1', x1 + offsetX);
+                rail1.setAttribute('y1', y1 + offsetY);
+                rail1.setAttribute('x2', x2 + offsetX);
+                rail1.setAttribute('y2', y2 + offsetY);
+                rail1.setAttribute('class', 'ladder-line');
+
+                const rail2 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                rail2.setAttribute('x1', x1 - offsetX);
+                rail2.setAttribute('y1', y1 - offsetY);
+                rail2.setAttribute('x2', x2 - offsetX);
+                rail2.setAttribute('y2', y2 - offsetY);
+                rail2.setAttribute('class', 'ladder-line');
+
+                svg.appendChild(rail1);
+                svg.appendChild(rail2);
+
+                const rungsCount = Math.floor(length / 22);
+                for (let i = 1; i < rungsCount; i++) {
+                    const t = i / rungsCount;
+                    const rx = x1 + dx * t;
+                    const ry = y1 + dy * t;
+
+                    const rung = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                    rung.setAttribute('x1', rx + offsetX);
+                    rung.setAttribute('y1', ry + offsetY);
+                    rung.setAttribute('x2', rx - offsetX);
+                    rung.setAttribute('y2', ry - offsetY);
+                    rung.setAttribute('class', 'ladder-rung');
+
+                    svg.appendChild(rung);
+                }
+            }
+        }
+
+        function startGame() {
+            players = [];
+            const avatarIcons = ["🦊", "🐼", "🐯", "🐨"];
+            const colors = ["#FF5964", "#118AB2", "#FFD166", "#06D6A0"];
+
+            for (let i = 0; i < playerCount; i++) {
+                const nameInput = document.getElementById(`player-name-${i}`);
+                const name = nameInput && nameInput.value.trim() !== "" ? nameInput.value.trim() : `Pemain ${i+1}`;
+                players.push({
+                    id: i,
+                    name: name,
+                    avatar: avatarIcons[i],
+                    color: colors[i],
+                    position: 1
+                });
+            }
+
+            currentTurnIndex = 0;
+
+            document.getElementById('setup-screen').classList.add('hidden');
+            document.getElementById('game-screen').classList.remove('hidden');
+            document.getElementById('game-screen').classList.add('flex');
+
+            renderPawns();
+            updateTurnUI();
+            updateLeaderboard();
+            
+            setTimeout(drawLadders, 100);
+        }
+
+        function renderPawns() {
+            const pawnLayer = document.getElementById('pawn-layer');
+            pawnLayer.innerHTML = '';
+
+            players.forEach((player) => {
+                const pawn = document.createElement('div');
+                pawn.id = `pawn-${player.id}`;
+                pawn.className = 'pawn font-bold shadow-md';
+                pawn.style.backgroundColor = player.color;
+                pawn.innerHTML = player.avatar;
+
+                pawnLayer.appendChild(pawn);
+                updatePawnPosition(player.id, player.position);
+            });
+        }
+
+        function updatePawnPosition(playerId, tileNumber) {
+            const pawn = document.getElementById(`pawn-${playerId}`);
+            if (!pawn) return;
+
+            const coords = getTileCoordinates(tileNumber);
+            const offset = (playerId % 4) * 3 - 4;
+
+            pawn.style.left = `calc(${coords.x}% - 4% + ${offset}px)`;
+            pawn.style.top = `calc(${coords.y}% - 4% + ${offset}px)`;
+        }
+
+        function updateTurnUI() {
+            const player = players[currentTurnIndex];
+            document.getElementById('current-player-avatar').innerText = player.avatar;
+            document.getElementById('current-player-avatar').style.backgroundColor = `${player.color}20`;
+            document.getElementById('current-player-name').innerText = player.name;
+            document.getElementById('current-player-pos').innerText = `Berada di Petak ${player.position}`;
+            document.getElementById('turn-indicator-bg').style.backgroundColor = player.color;
+
+            const rollBtn = document.getElementById('btn-roll-dice');
+            rollBtn.disabled = false;
+            rollBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        }
+
+        function updateLeaderboard() {
+            const container = document.getElementById('leaderboard-list');
+            container.innerHTML = '';
+
+            const sorted = [...players].sort((a, b) => b.position - a.position);
+
+            sorted.forEach((p, idx) => {
+                const isCurrent = p.id === players[currentTurnIndex].id;
+                container.innerHTML += `
+                    <div class="flex items-center justify-between p-2 rounded-xl text-sm font-bold ${isCurrent ? 'bg-sky-50 border-2 border-sky-400' : 'bg-slate-50 border border-slate-200'}">
+                        <div class="flex items-center space-x-2">
+                            <span class="text-xs text-slate-400">#${idx+1}</span>
+                            <span class="text-lg">${p.avatar}</span>
+                            <span class="text-slate-700">${p.name}</span>
+                        </div>
+                        <span class="px-2.5 py-0.5 rounded-full text-xs text-white" style="background-color: ${p.color}">
+                            Petak ${p.position}
+                        </span>
+                    </div>
+                `;
+            });
+        }
+
+        function handleDiceRollClick() {
+            if (isRolling) return;
+            isRolling = true;
+
+            const btn = document.getElementById('btn-roll-dice');
+            btn.disabled = true;
+            btn.classList.add('opacity-50', 'cursor-not-allowed');
+
+            const diceIcon = document.getElementById('dice-icon');
+            const diceContainer = document.getElementById('dice-container');
+
+            diceContainer.classList.add('dice-rolling');
+            playSound('roll');
+
+            const diceIcons = [
+                'fa-dice-one', 'fa-dice-two', 'fa-dice-three',
+                'fa-dice-four', 'fa-dice-five', 'fa-dice-six'
+            ];
+
+            let count = 0;
+            const interval = setInterval(() => {
+                const tempRoll = Math.floor(Math.random() * 6) + 1;
+                diceIcon.className = `fa-solid ${diceIcons[tempRoll - 1]}`;
+                count++;
+
+                if (count > 12) {
+                    clearInterval(interval);
+                    diceContainer.classList.remove('dice-rolling');
+                    
+                    currentDiceRoll = Math.floor(Math.random() * 6) + 1;
+                    diceIcon.className = `fa-solid ${diceIcons[currentDiceRoll - 1]}`;
+                    
+                    setTimeout(() => {
+                        openQuizModal(currentDiceRoll);
+                        isRolling = false;
+                    }, 400);
+                }
+            }, 80);
+        }
+
+        function openQuizModal(diceValue) {
+            const randomIndex = Math.floor(Math.random() * QUESTION_DATABASE.length);
+            activeQuestion = QUESTION_DATABASE[randomIndex];
+
+            document.getElementById('dice-number-val').innerText = diceValue;
+            document.getElementById('quiz-category').innerText = activeQuestion.category;
+            document.getElementById('quiz-question-text').innerText = activeQuestion.question;
+            document.getElementById('quiz-photo-caption').innerText = activeQuestion.caption;
+
+            // Render Real Photo As Primary Visual Asset
+            const realImg = document.getElementById('quiz-real-photo');
+            const fallbackContainer = document.getElementById('quiz-svg-fallback');
+
+            if (activeQuestion.imageUrl) {
+                realImg.src = activeQuestion.imageUrl;
+                realImg.classList.remove('hidden');
+                fallbackContainer.classList.add('hidden');
+            } else if (CULTURAL_SVG_ART[activeQuestion.imageKey]) {
+                realImg.classList.add('hidden');
+                fallbackContainer.innerHTML = CULTURAL_SVG_ART[activeQuestion.imageKey];
+                fallbackContainer.className = 'w-full h-48 md:h-56 flex items-center justify-center bg-slate-900 rounded-t-2xl overflow-hidden';
+                fallbackContainer.classList.remove('hidden');
+            }
+
+            // Populate Answer Options
+            const optionsContainer = document.getElementById('quiz-options-container');
+            optionsContainer.innerHTML = '';
+
+            const optionLabels = ['A', 'B', 'C', 'D'];
+            activeQuestion.options.forEach((opt, idx) => {
+                optionsContainer.innerHTML += `
+                    <button onclick="checkAnswer(${idx})" class="quiz-opt-btn w-full p-3.5 rounded-2xl border-2 border-slate-200 bg-white hover:border-amber-400 hover:bg-amber-50/80 text-left font-bold text-slate-800 text-xs md:text-sm flex items-center space-x-3 transition shadow-sm transform hover:-translate-y-0.5">
+                        <span class="w-7 h-7 rounded-xl bg-gradient-to-tr from-amber-400 to-orange-500 flex items-center justify-center text-xs text-white font-extrabold shadow flex-shrink-0">${optionLabels[idx]}</span>
+                        <span class="flex-grow">${opt}</span>
+                    </button>
+                `;
+            });
+
+            document.getElementById('quiz-feedback').className = 'hidden p-3 rounded-xl text-center font-bold text-xs md:text-sm mb-3';
+            document.getElementById('btn-next-action').classList.add('hidden');
+
+            document.getElementById('quiz-modal').classList.remove('hidden');
+        }
+
+        /* Fallback Handler: Displays vector graphic fallback if photo fails to load */
+        function handleImageError(imgEl) {
+            if (!activeQuestion) {
+                imgEl.classList.add('hidden');
+                return;
+            }
+
+            imgEl.classList.add('hidden');
+            const fallbackContainer = document.getElementById('quiz-svg-fallback');
+            if (fallbackContainer && CULTURAL_SVG_ART[activeQuestion.imageKey]) {
+                fallbackContainer.innerHTML = CULTURAL_SVG_ART[activeQuestion.imageKey];
+                fallbackContainer.className = 'w-full h-48 md:h-56 flex items-center justify-center bg-slate-900 rounded-t-2xl overflow-hidden';
+                fallbackContainer.classList.remove('hidden');
+            }
+        }
+
+        let lastAnswerCorrect = false;
+
+        function checkAnswer(selectedIndex) {
+            const buttons = document.querySelectorAll('.quiz-opt-btn');
+            buttons.forEach(btn => btn.disabled = true);
+
+            const feedback = document.getElementById('quiz-feedback');
+            const nextBtn = document.getElementById('btn-next-action');
+
+            if (selectedIndex === activeQuestion.answer) {
+                lastAnswerCorrect = true;
+                playSound('correct');
+                buttons[selectedIndex].classList.remove('border-slate-200', 'bg-white');
+                buttons[selectedIndex].classList.add('border-emerald-500', 'bg-emerald-50', 'text-emerald-800');
+
+                feedback.className = "p-3 rounded-xl text-center font-bold text-xs md:text-sm mb-3 bg-emerald-100 text-emerald-800 border border-emerald-300";
+                feedback.innerHTML = `🎉 <strong>Hebat! Jawabanmu Benar!</strong><br>Bidakmu bergerak MAJU sejauh <strong>${currentDiceRoll}</strong> petak.`;
+            } else {
+                lastAnswerCorrect = false;
+                playSound('wrong');
+                buttons[selectedIndex].classList.remove('border-slate-200', 'bg-white');
+                buttons[selectedIndex].classList.add('border-rose-500', 'bg-rose-50', 'text-rose-800');
+
+                buttons[activeQuestion.answer].classList.remove('border-slate-200', 'bg-white');
+                buttons[activeQuestion.answer].classList.add('border-emerald-500', 'bg-emerald-50', 'text-emerald-800');
+
+                feedback.className = "p-3 rounded-xl text-center font-bold text-xs md:text-sm mb-3 bg-rose-100 text-rose-800 border border-rose-300";
+                feedback.innerHTML = `😅 <strong>Aduh, Kurang Tepat!</strong><br>Jawaban benar: <em>${activeQuestion.options[activeQuestion.answer]}</em>.<br>Bidakmu terpaksa MUNDUR <strong>${currentDiceRoll}</strong> petak!`;
+            }
+
+            feedback.classList.remove('hidden');
+            nextBtn.classList.remove('hidden');
+        }
+
+        function applyQuizResult() {
+            document.getElementById('quiz-modal').classList.add('hidden');
+
+            const currentPlayer = players[currentTurnIndex];
+            let steps = currentDiceRoll;
+
+            if (!lastAnswerCorrect) steps = -steps;
+
+            movePlayerSteps(currentPlayer, steps);
+        }
+
+        function movePlayerSteps(player, steps) {
+            let targetPosition = player.position + steps;
+
+            if (targetPosition < 1) targetPosition = 1;
+            if (targetPosition > 100) targetPosition = 100;
+
+            const direction = steps > 0 ? 1 : -1;
+            const totalSteps = Math.abs(targetPosition - player.position);
+
+            if (totalSteps === 0) {
+                finishTurn();
+                return;
+            }
+
+            let stepCount = 0;
+            const stepInterval = setInterval(() => {
+                player.position += direction;
+                updatePawnPosition(player.id, player.position);
+                playSound('roll');
+                updateLeaderboard();
+
+                stepCount++;
+                if (stepCount >= totalSteps) {
+                    clearInterval(stepInterval);
+
+                    setTimeout(() => {
+                        checkLadderBonus(player);
+                    }, 300);
+                }
+            }, 300);
+        }
+
+        function checkLadderBonus(player) {
+            if (LADDERS[player.position]) {
+                const climbedPosition = LADDERS[player.position];
+                playSound('ladder');
+
+                setTimeout(() => {
+                    player.position = climbedPosition;
+                    updatePawnPosition(player.id, player.position);
+                    updateLeaderboard();
+
+                    setTimeout(checkWinCondition, 400);
+                }, 400);
+            } else {
+                checkWinCondition();
+            }
+        }
+
+        function checkWinCondition() {
+            const currentPlayer = players[currentTurnIndex];
+
+            if (currentPlayer.position >= 100) {
+                document.getElementById('winner-name-text').innerText = `${currentPlayer.avatar} ${currentPlayer.name} Menang! 🎉`;
+                document.getElementById('victory-modal').classList.remove('hidden');
+
+                confetti({
+                    particleCount: 130,
+                    spread: 85,
+                    origin: { y: 0.6 }
+                });
+            } else {
+                finishTurn();
+            }
+        }
+
+        function finishTurn() {
+            currentTurnIndex = (currentTurnIndex + 1) % players.length;
+            updateTurnUI();
+            updateLeaderboard();
+        }
+
+        function showInstructionModal() {
+            document.getElementById('instruction-modal').classList.remove('hidden');
+        }
+
+        function hideInstructionModal() {
+            document.getElementById('instruction-modal').classList.add('hidden');
+        }
+
+        function resetGame() {
+            document.getElementById('victory-modal').classList.add('hidden');
+            document.getElementById('game-screen').classList.add('hidden');
+            document.getElementById('game-screen').classList.remove('flex');
+            document.getElementById('setup-screen').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
